@@ -1,14 +1,5 @@
 import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
-
-/**
- * fetch a html element
- * @param {string} element 
- * @returns {HTMLElement}
- */
-function getElement(element) {
-    console.log(`[data-${element}]`)
-    return document.querySelector(`[data-${element}]`)
-}
+import { getElement, setNightTheme, setDayTheme, previewHTML, formOptions, openClose } from './abstractions.js'
 
 const html = {
     showmore: {
@@ -48,44 +39,18 @@ const html = {
 }
 
 /**
- * sets theme to night theme
+ * updates the showmore button inner Text
+ * @returns {string}
  */
-function setNightTheme() {
-    document.documentElement.style.setProperty('--color-dark', '255, 255, 255');
-    document.documentElement.style.setProperty('--color-light', '10, 10, 20');
-}
-
-/**
- * sets theme to day theme
- */
-function setDayTheme() {
-    document.documentElement.style.setProperty('--color-dark', '10, 10, 20');
-    document.documentElement.style.setProperty('--color-light', '255, 255, 255');
+function showmoreHtml() {
+    return `
+    <span>Show more</span>
+    <span class="list__remaining"> (${(matches.length - (page * BOOKS_PER_PAGE)) > 0 ? (matches.length - (page * BOOKS_PER_PAGE)) : 0})</span>
+`
 }
 
 let page = 1; //number of pages displayed
 let matches = books //all books in our data file
-
-/**
- * Set inner html for book previews
- * @param {string} author 
- * @param {string} image 
- * @param {string} title 
- * @returns {string}
- */
-function previewHTML(author, image, title) {
-    return `
-    <img
-        class="preview__image"
-        src="${image}"
-    />
-    
-    <div class="preview__info">
-        <h3 class="preview__title">${title}</h3>
-        <div class="preview__author">${authors[author]}</div>
-    </div>
-`
-}
 
 const starting = document.createDocumentFragment()
 
@@ -100,30 +65,6 @@ for (const { author, id, image, title } of matches.slice(0, BOOKS_PER_PAGE)) {
 }
 
 html.showmore.list.appendChild(starting)
-
-/**
- * Populates form select input with options
- * @param {object} obj - object with select input options
- * @returns {DocumentFragment}
- */
-function formOptions(obj) {
-
-    const frag = document.createDocumentFragment()
-    const firstGenreElement = document.createElement('option')
-    firstGenreElement.value = 'any'
-    firstGenreElement.innerText = 'All'
-    frag.appendChild(firstGenreElement)
-    
-    for (const [id, name] of Object.entries(obj)) {
-        const element = document.createElement('option')
-        element.value = id
-        element.innerText = name
-        frag.appendChild(element)
-    }
-    
-    return frag
-    
-}
 
 html.search.genres.appendChild(formOptions(genres))
 
@@ -140,57 +81,17 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 html.showmore.listBtn.innerText = `Show more (${books.length - BOOKS_PER_PAGE})`
 html.showmore.listBtn.disabled = (matches.length - (page * BOOKS_PER_PAGE)) > 0
 
-/**
- * updates the showmore button inner Text
- * @returns {string}
- */
-function showmoreHtml() {
-    return `
-    <span>Show more</span>
-    <span class="list__remaining"> (${(matches.length - (page * BOOKS_PER_PAGE)) > 0 ? (matches.length - (page * BOOKS_PER_PAGE)) : 0})</span>
-`
-}
 
 html.showmore.listBtn.innerHTML = showmoreHtml()
 
-/**
- * Opens and closes overlays
- * @param {HTMLElement} element 
- */
-function openClose(element,overlay) {
-    element.addEventListener('click',()=>{
-        if (overlay.open == true) {
-            overlay.open = false
-        } else {
-            overlay.open = true
-        }
-    })
-}
-
-// html.search.cancel.addEventListener('click', () => {
-//     html.search.overlay.open = false
-// })
 openClose(html.search.cancel, html.search.overlay)
 
-// html.setting.cancel.addEventListener('click', () => {
-//     html.setting.overlay.open = false
-// })
 openClose(html.setting.cancel, html.setting.overlay)
 
-// html.search.btn.addEventListener('click', () => {
-//     html.search.overlay.open = true 
-//     html.search.title.focus()
-// })
 openClose(html.search.btn, html.search.overlay)
 
-// html.setting.btn.addEventListener('click', () => {
-//     html.setting.overlay.open = true 
-// })
 openClose(html.setting.btn, html.setting.overlay)
 
-// html.showmore.close.addEventListener('click', () => {
-//     html.showmore.active.open = false
-// })
 openClose(html.showmore.close, html.showmore.active)
 
 html.setting.form.addEventListener('submit', (event) => {
